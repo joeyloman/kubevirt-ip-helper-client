@@ -18,14 +18,16 @@ export KUBECONFIG=<PATH_TO_KUBECONFIG_FILE>
 
 Execute the vmnetcfg tool like:
 ```SH
-./kihctl <command> [vmnetcfg object namespace] [vmnetcfg object name]
+./kihctl <command> [object namespace] [object name]
 ```
 
 Commands:
 
+* ippool-list: lists all IPPool objects
+* ippool-show \<name>: show the IPPool configuration and status
 * vmnetcfg-list: lists all VirtualMachineNetworkConfig objects 
-* vmnetcfg-clear-status: clears the status of a VirtualMachineNetworkConfig object (in case of errors and this needs to be cleared)
-* vmnetcfg-reset: resets the VirtualMachineNetworkConfig object network configuration (in case you want to allocate a new IP)
+* vmnetcfg-clear-status \<namespace> \<name>: clears the status of a VirtualMachineNetworkConfig object (in case of errors and this needs to be cleared)
+* vmnetcfg-reset \<namespace> \<name>: resets the VirtualMachineNetworkConfig object network configuration (in case you want to allocate a new IP)
 * vmnetcfg-cleanup: cleans up VirtualMachineNetworkConfig object orphans (this is interactive with a backup option)
 
 # License
