@@ -18,7 +18,15 @@ import (
 )
 
 func usage() {
-	fmt.Printf("usage: %s <command> [VirtualMachineNetworkConfig object namespace] [VirtualMachineNetworkConfig object name]\n", os.Args[0])
+	fmt.Printf("usage: %s <command> [namespace] [name]\n\n", os.Args[0])
+	fmt.Printf("  commands:\n\n" +
+		"    ippool-list                              : lists all IPPool objects\n" +
+		"    ippool-show <name>                       : shows all IPPool details\n" +
+		"\n" +
+		"    vmnetcfg-list                            : lists all VirtualMachineNetworkConfig objects\n" +
+		"    vmnetcfg-clear-status <namespace> <name> : clears the status of a VirtualMachineNetworkConfig object (in case of errors and this needs to be cleared)\n" +
+		"    vmnetcfg-reset <namespace> <name>        : resets the VirtualMachineNetworkConfig object network configuration (in case you want to allocate a new IP)\n" +
+		"    vmnetcfg-cleanup                         : cleans up VirtualMachineNetworkConfig object orphans (this is interactive with a backup option)\n\n")
 	os.Exit(1)
 }
 
@@ -62,32 +70,55 @@ func main() {
 		panic(err.Error())
 	}
 
-	if os.Args[1] == "vmnetcfg-list" {
-		if err := app.listVirtualMachineNetworkConfigs(k8s_clientset, kih_clientset); err != nil {
+	fmt.Printf("Running on clustername: %s\n\n", config.Host)
+
+	// no args
+	if os.Args[1] == "ippool-list" {
+		if err := app.ListIPPools(k8s_clientset, kih_clientset); err != nil {
+			fmt.Printf("error: %s", err.Error())
+		}
+
+		return
+	} else if os.Args[1] == "vmnetcfg-list" {
+		if err := app.ListVirtualMachineNetworkConfigs(k8s_clientset, kih_clientset); err != nil {
 			fmt.Printf("error: %s", err.Error())
 		}
 
 		return
 	} else if os.Args[1] == "vmnetcfg-cleanup" {
-		if err := app.cleanupVirtualMachineNetworkConfigurations(k8s_clientset, kih_clientset); err != nil {
+		if err := app.CleanupVirtualMachineNetworkConfigurations(k8s_clientset, kih_clientset); err != nil {
 			fmt.Printf("error: %s", err.Error())
 		}
 
 		return
 	}
 
+	// 1 arg
+	if len(os.Args) < 3 {
+		usage()
+	}
+
+	if os.Args[1] == "ippool-show" {
+		if err := app.ShowIPPool(k8s_clientset, kih_clientset, os.Args[2]); err != nil {
+			fmt.Printf("error: %s", err.Error())
+		}
+
+		return
+	}
+
+	// 2 args
 	if len(os.Args) < 4 {
 		usage()
 	}
 
 	if os.Args[1] == "vmnetcfg-clear-status" {
-		if err := app.clearVirtualMachineNetworkConfigStatus(k8s_clientset, kih_clientset, os.Args[2], os.Args[3]); err != nil {
+		if err := app.ClearVirtualMachineNetworkConfigStatus(k8s_clientset, kih_clientset, os.Args[2], os.Args[3]); err != nil {
 			fmt.Printf("error: %s", err.Error())
 		}
 
 		return
 	} else if os.Args[1] == "vmnetcfg-reset" {
-		if err := app.resetVirtualMachineNetworkConfig(k8s_clientset, kih_clientset, os.Args[2], os.Args[3]); err != nil {
+		if err := app.ResetVirtualMachineNetworkConfig(k8s_clientset, kih_clientset, os.Args[2], os.Args[3]); err != nil {
 			fmt.Printf("error: %s", err.Error())
 		}
 

@@ -16,23 +16,23 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
 
-	// "github.com/ghodss/yaml"
 	kihv1 "github.com/joeyloman/kubevirt-ip-helper/pkg/apis/kubevirtiphelper.k8s.binbash.org/v1"
 )
 
-func listVirtualMachineNetworkConfigs(k8s_clientset *kubernetes.Clientset, kih_clientset *kihclientset.Clientset) (err error) {
+func ListVirtualMachineNetworkConfigs(k8s_clientset *kubernetes.Clientset, kih_clientset *kihclientset.Clientset) (err error) {
 	vmNetCfgObjs, err := kih_clientset.KubevirtiphelperV1().VirtualMachineNetworkConfigs(corev1.NamespaceAll).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return fmt.Errorf("cannot fetch VirtualMachineNetworkConfig objects: %s", err.Error())
 	}
 
+	fmt.Printf("VirtualMachineNetworkConfig list:\n\n")
 	for _, vmnetcfg := range vmNetCfgObjs.Items {
-		fmt.Printf("VirtualMachineNetworkConfig: %s/%s\n", vmnetcfg.Namespace, vmnetcfg.Name)
-		fmt.Print("  Network interface configuration:\n")
+		fmt.Printf("  VirtualMachineNetworkConfig: %s/%s\n", vmnetcfg.Namespace, vmnetcfg.Name)
+		fmt.Printf("    Network interface configuration:\n")
 		for _, v := range vmnetcfg.Spec.NetworkConfig {
 			for _, s := range vmnetcfg.Status.NetworkConfig {
 				if v.MACAddress == s.MACAddress {
-					fmt.Printf("    mac: %s, ip: %s, network: %s, status: %s %s\n", v.MACAddress, v.IPAddress, v.NetworkName, s.Status, s.Message)
+					fmt.Printf("      mac: %s, ip: %s, network: %s, status: %s %s\n", v.MACAddress, v.IPAddress, v.NetworkName, s.Status, s.Message)
 				}
 			}
 		}
@@ -42,7 +42,7 @@ func listVirtualMachineNetworkConfigs(k8s_clientset *kubernetes.Clientset, kih_c
 	return
 }
 
-func resetVirtualMachineNetworkConfig(k8s_clientset *kubernetes.Clientset, kih_clientset *kihclientset.Clientset, vmnetcfgNamespace string, vmnetcfgName string) (err error) {
+func ResetVirtualMachineNetworkConfig(k8s_clientset *kubernetes.Clientset, kih_clientset *kihclientset.Clientset, vmnetcfgNamespace string, vmnetcfgName string) (err error) {
 	var netcfgErrorDetected bool = false
 
 	vmnetcfg, err := kih_clientset.KubevirtiphelperV1().VirtualMachineNetworkConfigs(vmnetcfgNamespace).Get(context.TODO(), vmnetcfgName, metav1.GetOptions{})
@@ -88,7 +88,7 @@ func resetVirtualMachineNetworkConfig(k8s_clientset *kubernetes.Clientset, kih_c
 	return
 }
 
-func clearVirtualMachineNetworkConfigStatus(k8s_clientset *kubernetes.Clientset, kih_clientset *kihclientset.Clientset, vmNetCfgNamespace string, vmNetCfgName string) (err error) {
+func ClearVirtualMachineNetworkConfigStatus(k8s_clientset *kubernetes.Clientset, kih_clientset *kihclientset.Clientset, vmNetCfgNamespace string, vmNetCfgName string) (err error) {
 	vmNetCfgObj, err := kih_clientset.KubevirtiphelperV1().VirtualMachineNetworkConfigs(vmNetCfgNamespace).Get(context.TODO(), vmNetCfgName, metav1.GetOptions{})
 	if err != nil {
 		return fmt.Errorf("cannot fetch VirtualMachineNetworkConfig objects: %s", err.Error())
@@ -145,7 +145,7 @@ func backupVirtualMachineNetworkConfiguration(kih_clientset *kihclientset.Client
 	return os.WriteFile(filename, yamlData, 0644)
 }
 
-func cleanupVirtualMachineNetworkConfigurations(k8s_clientset *kubernetes.Clientset, kih_clientset *kihclientset.Clientset) (err error) {
+func CleanupVirtualMachineNetworkConfigurations(k8s_clientset *kubernetes.Clientset, kih_clientset *kihclientset.Clientset) (err error) {
 	vmNetCfgObjs, err := kih_clientset.KubevirtiphelperV1().VirtualMachineNetworkConfigs(corev1.NamespaceAll).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		return fmt.Errorf("cannot fetch VirtualMachineNetworkConfig objects: %s", err.Error())
